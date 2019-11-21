@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tx.ss.mapper.UserMapper">
+    <resultMap id="UserLogin" type="com.tx.ss.entity.User">
+        <id property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="password" column="password"/>
+        <result property="isStop" column="is_stop"/>
+        <collection property="roles" ofType="com.tx.ss.entity.RoleTbl">
+            <id property="roleId" column="role_id"/>
+            <result property="roleName" column="role_name"/>
+            <result property="roleCode" column="role_code"/>
+        </collection>
+    </resultMap>
+
+
+    <resultMap id="RolePermission" type="com.tx.ss.entity.PermissionTbl">
+        <id column="permission_id" property="permissionId"/>
+        <result column="alias" property="alias"/>
+        <result column="name" property="name"/>
+        <result column="pid" property="pid"/>
+        <result column="level" property="level"/>
+        <result column="permission_url" property="permissionUrl"/>
+        <result column="view_icon" property="viewIcon"/>
+        <result column="is_button" property="isButton"/>
+        <association property="roleTbl" javaType="com.tx.ss.entity.RoleTbl">
+            <id column="role_id" property="roleId"/>
+            <result column="role_name" property="roleName"/>
+            <result column="role_code" property="roleCode"/>
+        </association>
+    </resultMap>
+    <select id="findOneByUserName" resultMap="UserLogin">
+        select u.*,r.* from t_user_tbl u
+        INNER JOIN t_user_role ur on ur.user_id = u.user_id
+        INNER JOIN t_role_tbl r on r.role_id = ur.role_id
+        <where>
+            <if test="userName !=null and userName !=''">
+                and user_name = #{userName}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="findRoleById" resultType="java.lang.String">
+        select r.role_code from t_user_tbl u
+        INNER JOIN t_user_role ur on ur.user_id = u.user_id
+        INNER JOIN t_role_tbl r on r.role_id = ur.role_id
+        <where>
+            <if test="userId !=null and userId !=''">
+                and u.user_id = #{userId}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="findAllRolePermission" resultMap="RolePermission">
+       SELECT
+        r.*,p.*
+        FROM
+        t_permission p
+        INNER JOIN t_role_permission rp ON p.permission_id= rp.permission_id
+        INNER JOIN t_role_tbl r ON r.role_id = rp.role_id
+    </select>
+</mapper>
